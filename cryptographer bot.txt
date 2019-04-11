@@ -1,0 +1,89 @@
+import vk_api
+import random
+def isinteger(num):
+    try:
+        num = int(num) + 1
+        return True
+    except:
+        return False
+def send(msg):
+    vk.method("messages.send", {"peer_id": id, "message": msg, "random_id": random.randint(0, 1000000)})
+commands = ["помощь", "переверни", "цезарь", "бинарный текст", "текст из двоичного", "длина"]
+class bot():
+    def __init__(self):
+        pass
+    def dontknow():
+        send("Я не знаю, как ответить на это сообщение!")
+    def help():
+        send("""Мои команды:
+Цезарь (сдвиг) (текст)
+Зашифровка шифром Цезаря. Для расшифровки задайте сдвиг, равный числу, противоположному использованному при зашифровке.
+Переверни (текст)
+Переворот текста
+Бинарный текст (текст)
+Перевод текста в двоичный код
+Текст из двоичного (двоичный ряд)
+Перевод двоичного кода в текст
+Длина (текст)
+Длина текста в символах и словах
+""")
+    def reverse(msg):
+        send("""Перевёрнутый текст:
+""" + msg[10::][::-1])
+    def caesar(msg):
+        num = msg[7:9:]
+        if isinteger(num) == False:
+            send("Сдвиг должен быть однозначным числом!")
+            return False
+        newmsg = ""
+        for i in msg[9::]:
+            newmsg = newmsg + chr(ord(i) + int(num))
+        if int(num) < 0:
+            newmsg = newmsg[1::]
+        send("""Текст:
+""" + newmsg)
+    def strtobin(msg):
+        st = msg[15::]
+        send("""Текст:
+""" + ' '.join(format(ord(x), 'b') for x in st))
+    def bintostr(msg):
+        st = msg[18::]
+        try:
+            send("""Текст:
+""" + ''.join([chr(int(st, 2)) for st in st.split()]))
+        except:
+            send("Некорректная строка! Двоичный ряд должен быть разбит на ряды по 16 символов.")
+    def length(msg):
+        st = msg[6::]
+        send("""Длина текста:
+""" + str(len(st)) + " символов" + ", " + str(len(st.split(' '))) + " слов.")
+while True:
+    token = "be4cc966f720980196af08ba33277e4110279231ccfb4225eaffc39b6ff56efe2f740afa3786d118d5508"
+    vk = vk_api.VkApi(token=token)
+    vk._auth_token()
+    messages = vk.method("messages.getConversations", {"offset": 0, "count": 20, "filter": "unanswered"})
+    if messages["count"] >= 1:
+        id = messages["items"][0]["last_message"]["from_id"]
+        body = messages["items"][0]["last_message"]["text"]
+        count = 0
+        if body.lower() == "помощь":
+            bot.help()
+            count += 1
+        if body.lower()[:9:] == "переверни":
+            bot.reverse(body)
+            count += 1
+        if body.lower()[:6:] == "цезарь":
+            bot.caesar(body)
+            count += 1
+        if body.lower()[:14:] == "бинарный текст":
+            bot.strtobin(body)
+            count += 1
+        if body.lower()[:18:] == "текст из двоичного":
+            bot.bintostr(body)
+            count += 1
+        if body.lower()[:5:] == "длина":
+            bot.length(body)
+            count += 1
+        elif body.lower() not in commands and count < 1:
+            bot.dontknow()
+            bot.help()
